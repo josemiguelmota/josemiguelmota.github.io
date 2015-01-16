@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html ng-app="parkingApp">
+<head>
+    <meta charset="utf-8">
+    <title>Parking</title>
+    <script src="../js/angular.js"></script>
+    <script src="../js/jquery.js"></script>
+    <script src="../js/bootstrap.js"></script>
+    <link href="../css/bootstrap.css" rel="stylesheet" />
+    <link href="../css/bootstrap-theme.css" rel="stylesheet" />
+
+    <script>
+
+        var model= {};
+        angular.module("parkingApp", [])
+          .run(function ($http) {
+            $http.get("profesores.json").success(function (data) {
+            model.items = data;
+            });
+        })
+            .controller("profesoresCtrl", function ($scope) {
+                $scope.profesores = model;
+
+
+                $scope.botones= ["Todas las columnas", "Solamente Nombre y Departamento"];
+
+                $scope.opciones={
+                    elegida: "Todas las columnas"
+                };
+
+                $scope.data = {
+                    fondoTabla: "Beige",
+                    plazas: "OrangePlazas",
+                    subtitulo: 'red',
+                    titulo:"BlueTitulo",
+                    creador: "Green"
+                };
+                $scope.ordenarPor = function(orden){
+                    $scope.ordenSeleccionado= orden;
+                };
+                $scope.handleEvent = function (e) {
+                    console.log("Event type: " + e.type);
+                    if(e.type == "mouseover")
+                        $scope.data.fondoTabla= "Blue";
+                    else
+                        $scope.data.fondoTabla="Beige";
+
+                }
+
+            });
+
+    </script>
+    <style>
+        .Green { color: #235800;
+                 font-weight: bold;}
+        .Blue { background-color: lightblue; }
+        .BlueTitulo { background-color: lightblue;
+                      text-align: center;}
+        .Beige { background-color: #FFD8AE; }
+        .OrangePlazas {background-color: #F69328;
+                 text-decoration: underline;
+                 text-transform: uppercase;
+                 font-style: italic;
+                 font-weight: bold;
+                 text-align: center;}
+    </style>
+</head>
+<body>
+    <div id="todoPanel" class="panel" ng-controller="profesoresCtrl">
+       <p ng-class="data.creador">Creado por: Diego Godoy Poce</p>
+        <h1 class="panel-header" ng-class="data.titulo">Parking de Profesores</h1>
+        <h3 ng-style="{'color': data.subtitulo}">Mostrar Profesores </h3>
+
+        <div class="row well">
+               <div class="col-xs-12" ng-repeat="(key, val) in opciones">
+                    <div class="radio" ng-repeat="bt in botones">
+                        <label>
+                            <input type="radio" ng-model="opciones[key]" value="{{bt}}">{{bt}}
+                        </label>
+                    </div>
+                </div>
+        </div>
+        <div>
+            <b>Filtra por Nombre:</b> <input ng-model="filtro.Nombre"> <b>Filtra por Departamento:</b> <input ng-model="filtro.Departamento">
+        </div>
+        <br>
+        <table class="table" >
+            <thead>
+                <tr><th><a href="" ng-click="ordenarPor('Nombre')">Nombre</a><span class="caret" style="cursor:pointer" ng-click="ordenarPor('-Nombre')" ></span></th>
+
+                <th ng-show="opciones.elegida==botones[0]">Plaza</th>
+                <th><a href="" ng-click="ordenarPor('Departamento')">Departamento</a><span class="caret" style="cursor:pointer" ng-click="ordenarPor('-Departamento')" ></span></th></tr>
+            </thead>
+            <tr ng-repeat="item in profesores.items |filter:filtro | orderBy:ordenSeleccionado"
+               ng-mouseenter="handleEvent($event)"
+               ng-mouseleave="handleEvent($event)"
+               ng-class="data.fondoTabla">
+                <td >{{item.Nombre}}</td>
+                <td ng-show="opciones.elegida==botones[0]"><input type="checkbox" ng-model="item.Plaza"/></td>
+                <td >{{item.Departamento}}</td>
+            </tr>
+        </table>
+        <br>
+        <h4 ng-class="data.plazas">Plazas por asignar</h4>
+        <div ng-repeat="plazas in profesores.items" ng-hide="plazas.Plaza">
+            <p align="center">¡Asígnale plaza a {{plazas.Nombre}}!</p>
+        </div>
+    </div>
+</body>
+</html>
